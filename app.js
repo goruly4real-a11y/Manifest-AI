@@ -1,16 +1,27 @@
+// ── Models ────────────────────────────────────────────────────
+const MODELS = {
+  claude: [
+    { id: 'claude-opus-4-20250514',   label: 'Claude Opus 4   — Most powerful' },
+    { id: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4 — Fast & smart (recommended)' },
+    { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5 — Fastest & cheapest' },
+  ],
+  gemini: [
+    { id: 'gemini-2.5-pro-preview-05-06', label: 'Gemini 2.5 Pro   — Most powerful' },
+    { id: 'gemini-2.0-flash',             label: 'Gemini 2.0 Flash — Fast & smart (recommended)' },
+    { id: 'gemini-1.5-flash',             label: 'Gemini 1.5 Flash — Lightweight' },
+    { id: 'gemini-1.5-pro',               label: 'Gemini 1.5 Pro   — Balanced' },
+  ]
+};
+
 // ── State ──────────────────────────────────────────────────────
-let provider = 'gemini';
+let provider = 'claude';
 let boardData = null;
 let selectedVibe = '';
 
-// Gemini key is hardcoded — users don't need to paste it
-const GEMINI_KEY = 'AIzaSyBbjBiRqf4-PwR7brcZvNwhAdDCY-uY9ko';
-
-// ── Init: default to Gemini with key hidden ────────────────────
+// ── Init ───────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
-  setProvider('gemini');
+  setProvider('claude');
 
-  // Chip listeners
   document.querySelectorAll('#areaChips .chip').forEach(btn => {
     btn.addEventListener('click', () => btn.classList.toggle('selected'));
   });
@@ -28,13 +39,21 @@ function setProvider(p) {
   provider = p;
   document.getElementById('btnClaude').classList.toggle('active', p === 'claude');
   document.getElementById('btnGemini').classList.toggle('active', p === 'gemini');
-  const apiRow = document.getElementById('apiKeyRow');
-  if (p === 'gemini') {
-    apiRow.style.display = 'none'; // key is hardcoded, hide the field
-  } else {
-    apiRow.style.display = '';
+
+  // Populate model dropdown
+  const sel = document.getElementById('modelSelect');
+  sel.innerHTML = MODELS[p].map(m =>
+    `<option value="${m.id}">${m.label}</option>`
+  ).join('');
+
+  // Update key hint link
+  const hint = document.getElementById('keyHint');
+  if (p === 'claude') {
     document.getElementById('apiKey').placeholder = 'sk-ant-api03-…';
-    document.getElementById('keyLabel').innerHTML = 'Claude API Key <span class="key-hint">(<a href="https://console.anthropic.com" target="_blank">get yours free</a>)</span>';
+    hint.innerHTML = '(<a href="https://console.anthropic.com" target="_blank">get yours free</a>)';
+  } else {
+    document.getElementById('apiKey').placeholder = 'AIza…';
+    hint.innerHTML = '(<a href="https://aistudio.google.com/app/apikey" target="_blank">get yours free</a>)';
   }
 }
 
@@ -119,7 +138,7 @@ Respond with ONLY a raw JSON object — no markdown, no code fences, no explanat
 }
 
 // ── API: Claude ────────────────────────────────────────────────
-async function callClaude(apiKey, prompt) {
+async function callClaude(apiKey, model, prompt) {
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -129,7 +148,7 @@ async function callClaude(apiKey, prompt) {
       'anthropic-dangerous-direct-browser-access': 'true'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model,
       max_tokens: 2500,
       messages: [{ role: 'user', content: prompt }]
     })
@@ -143,9 +162,8 @@ async function callClaude(apiKey, prompt) {
 }
 
 // ── API: Gemini ────────────────────────────────────────────────
-async function callGemini(apiKey, prompt) {
-  // Use gemini-2.0-flash — fast and free tier available
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+async function callGemini(apiKey, model, prompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -171,13 +189,10 @@ async function generate() {
   const obstacle   = document.getElementById('obstacle').value.trim();
   const threeWords = document.getElementById('threeWords').value.trim();
   const areas      = [...document.querySelectorAll('#areaChips .chip.selected')].map(c => c.dataset.val);
+  const apiKey     = document.getElementById('apiKey').value.trim();
+  const model      = document.getElementById('modelSelect').value;
 
-  // Get API key: hardcoded for Gemini, manual entry for Claude
-  const apiKey = provider === 'gemini'
-    ? GEMINI_KEY
-    : document.getElementById('apiKey').value.trim();
-
-  if (provider === 'claude' && !apiKey) return showErr('Please enter your Claude API key.');
+  if (!apiKey)       return showErr('Please enter your API key.');
   if (!dream)        return showErr('Please describe your biggest dream — this is the heart of your board.');
   if (!selectedVibe) return showErr('Please choose an aesthetic vibe for your board.');
 
@@ -193,8 +208,8 @@ async function generate() {
   try {
     const prompt = buildPrompt(inputs);
     const raw = provider === 'claude'
-      ? await callClaude(apiKey, prompt)
-      : await callGemini(apiKey, prompt);
+      ? await callClaude(apiKey, model, prompt)
+      : await callGemini(apiKey, model, prompt);
 
     // Extract JSON even if model wraps it in markdown
     const clean = raw.replace(/```json|```/g, '').trim();
