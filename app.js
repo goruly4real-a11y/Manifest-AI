@@ -1,15 +1,14 @@
 // ── Models ────────────────────────────────────────────────────
 const MODELS = {
   claude: [
-    { id: 'claude-opus-4-20250514',   label: 'Claude Opus 4   — Most powerful' },
-    { id: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4 — Fast & smart (recommended)' },
-    { id: 'claude-haiku-4-5-20251001',label: 'Claude Haiku 4.5 — Fastest & cheapest' },
+    { id: 'claude-opus-4-20250514',    label: 'Claude Opus 4    — Most powerful' },
+    { id: 'claude-sonnet-4-20250514',  label: 'Claude Sonnet 4  — Recommended ✦' },
+    { id: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5 — Fastest' },
   ],
   gemini: [
-    { id: 'gemini-2.5-pro-preview-05-06', label: 'Gemini 2.5 Pro   — Most powerful' },
-    { id: 'gemini-2.0-flash',             label: 'Gemini 2.0 Flash — Fast & smart (recommended)' },
-    { id: 'gemini-1.5-flash',             label: 'Gemini 1.5 Flash — Lightweight' },
-    { id: 'gemini-1.5-pro',               label: 'Gemini 1.5 Pro   — Balanced' },
+    { id: 'gemini-2.0-flash',          label: 'Gemini 2.0 Flash — Recommended ✦' },
+    { id: 'gemini-2.0-flash-lite',     label: 'Gemini 2.0 Flash Lite — Fastest' },
+    { id: 'gemini-1.5-pro',            label: 'Gemini 1.5 Pro  — Balanced' },
   ]
 };
 
@@ -32,7 +31,33 @@ window.addEventListener('DOMContentLoaded', () => {
       selectedVibe = btn.dataset.val;
     });
   });
+
+  // Live key preview — show first 8 and last 4 chars so user can verify paste worked
+  document.getElementById('apiKey').addEventListener('input', function() {
+    const val = this.value.trim();
+    const preview = document.getElementById('keyPreview');
+    if (!val) { preview.textContent = ''; return; }
+    if (val.length < 12) {
+      preview.textContent = '⚠ Key seems too short';
+      preview.style.color = '#c9a84c';
+    } else {
+      const masked = val.slice(0,8) + '••••••••' + val.slice(-4);
+      preview.textContent = '✓ ' + masked + '  (' + val.length + ' chars)';
+      preview.style.color = '#4a8a5a';
+    }
+  });
 });
+
+// ── Key visibility toggle ──────────────────────────────────────
+let keyVisible = true;
+function toggleKeyVis() {
+  const input = document.getElementById('apiKey');
+  const btn   = document.getElementById('keyToggle');
+  keyVisible = !keyVisible;
+  input.style.webkitTextSecurity = keyVisible ? 'none' : 'disc';
+  input.style.textSecurity       = keyVisible ? 'none' : 'disc';
+  btn.textContent = keyVisible ? '👁' : '🙈';
+}
 
 // ── Provider toggle ────────────────────────────────────────────
 function setProvider(p) {

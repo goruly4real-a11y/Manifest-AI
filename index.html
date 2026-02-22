@@ -57,7 +57,11 @@
 
         <div class="field-group" id="apiKeyRow">
           <label class="field-label" id="keyLabel">API Key <span class="key-hint" id="keyHint">(<a href="https://console.anthropic.com" target="_blank">get yours free</a>)</span></label>
-          <input type="password" id="apiKey" autocomplete="off" class="form-input" placeholder="sk-ant-api03-…" />
+          <div class="api-key-wrap">
+            <input type="text" id="apiKey" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" inputmode="text" class="form-input api-key-input" placeholder="Paste your key here…" />
+            <button type="button" class="key-toggle" onclick="toggleKeyVis()" id="keyToggle" title="Show/hide key">👁</button>
+          </div>
+          <div class="key-preview" id="keyPreview"></div>
         </div>
 
         <div class="divider-line"><span>✦ about you ✦</span></div>
@@ -65,7 +69,7 @@
         <!-- Name -->
         <div class="field-group">
           <label class="field-label">Your first name</label>
-          <input type="text" id="userName" class="form-input" placeholder="e.g. Maya" />
+          <input type="text" id="userName" autocorrect="off" autocapitalize="words" spellcheck="false" class="form-input" placeholder="e.g. Maya" />
         </div>
 
         <!-- Life areas -->
@@ -92,7 +96,7 @@
         <!-- Current obstacle -->
         <div class="field-group">
           <label class="field-label">What's your biggest obstacle or fear right now?</label>
-          <input type="text" id="obstacle" class="form-input" placeholder="e.g. Self-doubt and not knowing where to start" />
+          <input type="text" id="obstacle" autocorrect="on" autocapitalize="sentences" class="form-input" placeholder="e.g. Self-doubt and not knowing where to start" />
         </div>
 
         <!-- Personality vibe -->
@@ -111,7 +115,7 @@
         <!-- Word that describes desired life -->
         <div class="field-group">
           <label class="field-label">3 words that describe your ideal life</label>
-          <input type="text" id="threeWords" class="form-input" placeholder="e.g. Free, Abundant, Purposeful" />
+          <input type="text" id="threeWords" autocorrect="on" autocapitalize="words" class="form-input" placeholder="e.g. Free, Abundant, Purposeful" />
         </div>
 
         <div id="errMsg" class="err-msg"></div>
