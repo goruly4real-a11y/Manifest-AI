@@ -4,7 +4,7 @@ let boardData = null;
 let selectedVibe = '';
 
 // Gemini key is hardcoded — users don't need to paste it
-const GEMINI_KEY = 'AIzaSyBVQP-NwziBNV604IzK1DoCqko0zwW9z4g';
+const GEMINI_KEY = 'AIzaSyBbjBiRqf4-PwR7brcZvNwhAdDCY-uY9ko';
 
 // ── Init: default to Gemini with key hidden ────────────────────
 window.addEventListener('DOMContentLoaded', () => {
